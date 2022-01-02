@@ -8,7 +8,12 @@ package common.exception;;
  */
 public class AimsException extends RuntimeException {
 
-    public AimsException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public AimsException() {
 
 	}
 

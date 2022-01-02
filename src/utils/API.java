@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.Logger;
+
 import entity.payment.CreditCard;
 import entity.payment.PaymentTransaction;
 
@@ -27,15 +28,34 @@ import entity.payment.PaymentTransaction;
  *
  */
 public class API {
+
 	/**
 	 * String date format
 	 */
-	public static DateFormat DATE_FORMATER = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+	public static DateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+
 	/**
 	 * log data to console
 	 */
 	private static Logger LOGGER = Utils.getLogger(Utils.class.getName());
-	
+
+
+	/**
+	 * read response from server
+	 * @param conn : connection to server
+	 * @return response from server type String
+	 * @throws IOException
+	 */
+	private static String readResponse(HttpURLConnection conn) throws IOException {
+		BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+		String inputLine;
+		StringBuilder response = new StringBuilder(); // using StringBuilder for memory and performance
+		while ((inputLine = in.readLine()) != null) {
+			response.append(inputLine);
+		}
+		return response.toString();
+	}
+
 	/**
 	 * setup connection
 	 * @param url path to server
@@ -44,46 +64,18 @@ public class API {
 	 * @return HttpURlConnection
 	 * @throws IOException
 	 */
-	private static HttpURLConnection setupConnection(String url, String method, String token) throws IOException {
-		// setup
+	private static HttpURLConnection getHttpURLConnection(String url, String method, String token) throws IOException {
 		LOGGER.info("Request URL: " + url + "\n");
-		URL line_api_url = new URL(url); 
-		HttpURLConnection conn = (HttpURLConnection) line_api_url.openConnection(); 
-		conn.setDoInput(true); 
-		conn.setDoOutput(true); 
-		conn.setRequestMethod (method); 
-		conn.setRequestProperty("Content-Type", "application/json"); 
+		URL line_api_url = new URL(url);
+		HttpURLConnection conn = (HttpURLConnection) line_api_url.openConnection();
+		conn.setDoInput(true);
+		conn.setDoOutput(true);
+		conn.setRequestMethod(method);
+		conn.setRequestProperty("Content-Type", "application/json");
 		conn.setRequestProperty("Authorization", "Bearer " + token);
-		return conn; 
+		return conn;
 	}
-	
-	/**
-	 * read response from server
-	 * @param conn : connection to server
-	 * @return response from server type String
-	 * @throws IOException
-	 */
-	private static String readRespone (HttpURLConnection conn) throws IOException {
-		// get data sent back from server
-		BufferedReader in; 
-		String inputLine; 
-		if (conn.getResponseCode() / 100 == 2) {
-			in = new BufferedReader(new InputStreamReader(conn.getInputStream())); 
-			} 
-		else {
-			in = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-		}
-		StringBuilder response = new StringBuilder(); 
-		while ((inputLine = in.readLine()) != null)
-			System.out.println(inputLine); 
-		response.append(inputLine + "\n"); 
-		in.close(); 
-		LOGGER.info("Response Info: " + response.substring(0, response. length() - 1).toString()); 
-		return response.substring(0, response. length() - 1).toString();
-	}
-	
-	
-	
+
 	/**
 	 * GET method
 	 * @param url path to server
@@ -93,15 +85,11 @@ public class API {
 	 */
 	public static String get(String url, String token) throws Exception {
 		// setup
-		HttpURLConnection conn = setupConnection(url, "GET", token);
-		
+		HttpURLConnection conn = getHttpURLConnection(url, "GET", token);
 		// get data from server
-		String response = readRespone(conn);
-		
-		return response;
+		return readResponse(conn);
 	}
-
-	int var;
+	
 	/**
 	 * POST method
 	 * @param url path to server
@@ -109,24 +97,21 @@ public class API {
 	 * @return respose from server type String
 	 * @throws IOException
 	 */
-	public static String post(String url, String data
-			, String token
-	) throws IOException {
-		// setup
+	public static String post(String url, String data, String token) throws IOException {
 		allowMethods("PATCH");
-		HttpURLConnection conn = setupConnection(url, "PATCH", token);
-		
-		
+		// setup
+		HttpURLConnection conn = getHttpURLConnection(url, "PATCH", token);
+
 		// send data to server
+		String payload = data;
 		Writer writer = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
-		writer.write(data);
+		writer.write(payload);
 		writer.close();
-		
-		
-		// read data 
-		String response = readRespone(conn);
-		return response;
+
+		// read data from server
+		return readResponse(conn);
 	}
+
 	/**
 	 * PATCH, PUT, ... API in Java 11
 	 * @deprecated only Java 11

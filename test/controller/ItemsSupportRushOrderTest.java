@@ -9,27 +9,23 @@ import org.junit.jupiter.params.provider.CsvSource;
 /**
  * @author Nguyen Ngoc Thai Chau - 20183869
  */
-public class ValidateReceiveTimeTest {
+public class ItemsSupportRushOrderTest {
 
     private PlaceRushOrderController placeRushOrderController;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         placeRushOrderController = new PlaceRushOrderController(new RushOrderValidator());
     }
 
     @ParameterizedTest
     @CsvSource({
-            "08-08-2020 14:00,true",
-            "08/08/2020 14:00,false",
-            "08/13/2020 14:00,false",
-            "08-08/2020 14:00,false",
-            "08-08-2020 25:00,false",
-            "33-08-2020 14:00,false",
-            ",false"
+            "39,false",
+            "30,true",
+            "32,false"
     })
-    void test(String time, boolean expected) {
-        boolean isValid = placeRushOrderController.validateReceiveTime(time);
+    void test(int mediaID, boolean expected) {
+        boolean isValid = placeRushOrderController.isItemsSupportRushOrder(mediaID);
         Assertions.assertEquals(isValid, expected);
     }
 }

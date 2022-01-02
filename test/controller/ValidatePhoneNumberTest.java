@@ -1,33 +1,39 @@
 package controller;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import controller.impl.ShippingFeeCalculatorImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
- * 
  * @author Nguyen Ngoc Thai Chau - 20183869
- *
  */
 class ValidatePhoneNumberTest {
-	
+
 	private PlaceOrderController placeOrderController;
-	
+
 	@BeforeEach
 	void setUp() throws Exception {
-		placeOrderController = new PlaceOrderController();
+		placeOrderController = new PlaceOrderController(new ShippingFeeCalculatorImpl());
 	}
 
 	@ParameterizedTest
 	@CsvSource({
-		"0123456789,true",
-		"01234,false",
-		"abc123,false",
-		"1234567890,false"
+			"012345678,false",
+			"0123456789,true",
+			"12345,false",
+			"0123152416912,false",
+			"abcd,false",
+			"0abcd,false",
+			"*1245a,false",
+			",false"
 	})
+
 	void test(String phone, boolean expected) {
-		boolean isValided = placeOrderController.validatePhoneNumber(phone);
-		assertEquals(expected, isValided);
+		boolean isValid = placeOrderController.validatePhoneNumber(phone);
+		assertEquals(isValid, expected);
 	}
+
 }
